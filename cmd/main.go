@@ -6,11 +6,14 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/sirupsen/logrus"
 	environment "github.com/telia-oss/aws-env"
-	handler "github.com/telia-oss/concourse-github-lambda"
+	"github.com/telia-oss/concourse-github-lambda/pkg/dynamodb"
+	"github.com/telia-oss/concourse-github-lambda/pkg/handler"
+	"github.com/telia-oss/concourse-github-lambda/pkg/manager"
 )
 
 // Command options
 type Command struct {
+	GithubOrganisation        string `long:"github-organisation" env:"GITHUB_ORGANISATION" default:"Ometria" description:"Github organisation which owns the repositories."`
 	TokenPath                 string `long:"token-path" env:"SECRETS_MANAGER_TOKEN_PATH" default:"/concourse/{{.Team}}/{{.Owner}}-access-token" description:"Path to use when writing access tokens to AWS Secrets manager."`
 	KeyPath                   string `long:"key-path" env:"SECRETS_MANAGER_KEY_PATH" default:"/concourse/{{.Team}}/{{.Repository}}-deploy-key" description:"Path to use when writing private keys to AWS Secrets manager."`
 	KeyTitle                  string `long:"key-title" env:"GITHUB_KEY_TITLE" default:"concourse-{{.Team}}-deploy-key" description:"Title to use when adding deploy keys to Github."`
@@ -18,6 +21,7 @@ type Command struct {
 	TokenServicePrivateKey    string `long:"token-service-private-key" env:"GITHUB_TOKEN_SERVICE_PRIVATE_KEY" description:"Private key for the access token Github App." required:"true"`
 	KeyServiceIntegrationID   int64  `long:"key-service-integration-id" env:"GITHUB_KEY_SERVICE_INTEGRATION_ID" description:"Integration ID for the deploy key Github App." required:"true"`
 	KeyServicePrivateKey      string `long:"key-service-private-key" env:"GITHUB_KEY_SERVICE_PRIVATE_KEY" description:"Private key for the deploy key Github App." required:"true"`
+	ReposDynamoDBTableName    string `envconfig:"REPOS_DYNAMODB_TABLE_NAME"`
 }
 
 var logger *logrus.Logger
@@ -50,8 +54,11 @@ func main() {
 		logger.Fatalf("failed to parse flag: %s", err)
 	}
 
+	// Create repo lister
+	repoLister := dynamodb.NewDynamoDBReposLister(sess, command.ReposDynamoDBTableName, logger)
+
 	// Create new manager
-	manager, err := handler.NewManager(
+	manager, err := manager.NewManager(
 		sess,
 		command.TokenServiceIntegrationID,
 		command.TokenServicePrivateKey,
@@ -63,6 +70,6 @@ func main() {
 	}
 
 	// Run
-	f := handler.New(manager, command.TokenPath, command.KeyPath, command.KeyTitle, logger)
+	f := handler.New(manager, command.GithubOrganisation, repoLister, command.TokenPath, command.KeyPath, command.KeyTitle, logger)
 	lambda.Start(f)
 }

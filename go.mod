@@ -7,15 +7,14 @@ require (
 	github.com/aws/aws-sdk-go v1.33.18
 	github.com/bradleyfalzon/ghinstallation v1.1.1
 	github.com/golang/mock v1.4.4
-	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-github/v29 v29.0.3
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/sirupsen/logrus v1.6.0
+	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/telia-oss/aws-env v1.0.2
-	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20200803210538-64077c9b5642 // indirect
-	google.golang.org/appengine v1.6.6 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/net v0.4.0 // indirect
+	golang.org/x/oauth2 v0.3.0
+	google.golang.org/protobuf v1.28.1 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
